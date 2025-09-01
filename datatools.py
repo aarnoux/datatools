@@ -1,7 +1,8 @@
 import pandas as pd
+from typing import Union
 
 
-def describe_columns(df: pd.DataFrame) -> pd.DataFrame:
+def describe(input: Union[dict, pd.DataFrame]) -> pd.DataFrame:
     """
     Returns a DataFrame with the data types, the number of unique and nan values of each column in the input DataFrame.
     Args:
@@ -17,12 +18,15 @@ def describe_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     data_desc = []
 
-    for c in df.columns:
-        DATA_TYPE = df[c].dtype
-        NB_UNIQUE = df[c].astype(str).nunique()
-        NB_NAN = df[c].isna().sum()
+    if isinstance(input, dict):
+        input = pd.DataFrame(input)
+
+    for c in input.columns:
+        DATA_TYPE = input[c].dtype
+        NB_UNIQUE = input[c].astype(str).nunique()
+        NB_NAN = input[c].isna().sum()
         try:
-            RANDOM = df[c].dropna().sample(n=1).values[0]
+            RANDOM = input[c].dropna().sample(n=1).values[0]
         except ValueError:  # if only NA values
             RANDOM = None
 
@@ -31,12 +35,12 @@ def describe_columns(df: pd.DataFrame) -> pd.DataFrame:
                 c,
                 DATA_TYPE,
                 NB_UNIQUE,
-                f"{NB_NAN} ({round(NB_NAN/df.shape[0]*100)}%)",
+                f"{NB_NAN} ({round(NB_NAN/input.shape[0]*100)}%)",
                 RANDOM,
             ]
         )
 
-    df_output = pd.DataFrame(
+    output = pd.DataFrame(
         data_desc,
         columns=[
             "column name",
@@ -47,8 +51,8 @@ def describe_columns(df: pd.DataFrame) -> pd.DataFrame:
         ],
     )
     print(
-        f"Number of rows: {df.shape[0]}\t",
-        f"Number of columns: {df.shape[1]}",
+        f"Number of rows: {input.shape[0]}\t",
+        f"Number of columns: {input.shape[1]}",
     )
 
-    return df_output
+    return output
