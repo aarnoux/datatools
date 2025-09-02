@@ -51,7 +51,7 @@ module utils
 
 end module utils
 
-module statools
+module means
   implicit none
 
   contains
@@ -88,5 +88,45 @@ module statools
       winsorized_mean = sum(array) / size(array)
     end function winsorized_mean
 
-end module statools
+end module means
 
+module variances
+  implicit none
+
+  contains
+
+    real(8) function sample_variance(array) result(var)
+      use means, only: arithmetic_mean
+
+      real(8), intent(in) :: array(:)
+      real(8) :: mean
+
+      mean = arithmetic_mean(array)
+      var = (sum((array - mean)**2) / (size(array) - 1))
+
+    end function sample_variance
+
+    real(8) function sample_stdev(array)
+      real(8), intent(in) :: array(:)
+
+      sample_stdev = sqrt(sample_variance(array))
+    end function sample_stdev
+
+end module variances
+
+module normal
+  implicit none
+
+  contains
+
+  real(8) function pdf(x, mean, stdev)
+    real(8) :: x, mean, stdev, pi, e
+
+    pi = 3.14159
+    e = 2.71828
+
+    pdf = (1 / stdev) * (sqrt(2 * pi)) * (e**(-1/2) * ((x - mean**2) / stdev))
+
+  end function pdf
+
+end module normal
